@@ -66,7 +66,7 @@ async function buildAll() {
   });
 
   console.log("building Vercel API...");
-  for (const stale of ["api/index.cjs", "api/index.js"]) {
+  for (const stale of ["api/index.cjs", "api/index.js", "api/[...path].cjs"]) {
     await unlink(path.join(projectRoot, stale)).catch(() => {});
   }
   await esbuild({
@@ -74,7 +74,7 @@ async function buildAll() {
     platform: "node",
     bundle: true,
     format: "cjs",
-    outfile: path.join(projectRoot, "api/[...path].cjs"),
+    outfile: path.join(projectRoot, "api/index.cjs"),
     target: "node20",
     define: {
       "process.env.NODE_ENV": '"production"',

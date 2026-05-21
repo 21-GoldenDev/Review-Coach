@@ -74,7 +74,7 @@ Uses `dist/index.cjs` and serves the built client from `dist/public`.
 
 ## Deploy on Vercel
 
-This repo includes `vercel.json` so Vercel serves the React app from `dist/public` and routes `/api` and `/uploads` to a serverless function. `npm run build` bundles the API into `api/[...path].cjs` (catch-all handler for `/api/*`; generated at build time; requires Node 20.19+ for Vite 7).
+This repo includes `vercel.json` so Vercel serves the React app from `dist/public` and routes `/api` and `/uploads` to a serverless function. `npm run build` bundles the API into `api/index.cjs` (generated at build time; requires Node 20.19+ for Vite 7). `vercel.json` routes `/api/*` and `/uploads/*` to that function.
 
 1. Connect the GitHub repo in Vercel (Framework Preset: **Other** — do not set Output Directory to `dist` alone).
 2. Add environment variables in the Vercel project (Settings → Environment Variables), then redeploy:
