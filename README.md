@@ -74,7 +74,7 @@ Uses `dist/index.cjs` and serves the built client from `dist/public`.
 
 ## Deploy on Vercel
 
-This repo includes `vercel.json` so Vercel serves the React app from `dist/public` and routes `/api` and `/uploads` to a serverless function.
+This repo includes `vercel.json` so Vercel serves the React app from `dist/public` and routes `/api` and `/uploads` to a serverless function. `npm run build` bundles the API into `api/index.js` (do not add `api/index.ts` — Vercel cannot resolve bare ESM imports).
 
 1. Connect the GitHub repo in Vercel (Framework Preset: **Other** — do not set Output Directory to `dist` alone).
 2. Add environment variables in the Vercel project (Settings → Environment Variables), then redeploy:

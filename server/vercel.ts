@@ -1,4 +1,5 @@
 import type { Express } from "express";
+import { createApp } from "./app";
 
 let app: Express | undefined;
 let initError: Error | undefined;
@@ -10,7 +11,6 @@ export default async function handler(req: any, res: any) {
 
   try {
     if (!app) {
-      const { createApp } = await import("../server/app.js");
       ({ app } = await createApp());
     }
     return app(req, res);

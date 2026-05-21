@@ -1,6 +1,10 @@
 import { build as esbuild } from "esbuild";
 import { build as viteBuild } from "vite";
+import path from "path";
+import { fileURLToPath } from "url";
 import { rm, readFile } from "fs/promises";
+
+const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
 // server deps to bundle to reduce openat(2) syscalls
 // which helps cold start times
@@ -57,6 +61,24 @@ async function buildAll() {
     },
     minify: true,
     external: externals,
+    logLevel: "info",
+  });
+
+  console.log("building Vercel API...");
+  await esbuild({
+    entryPoints: [path.join(projectRoot, "server/vercel.ts")],
+    platform: "node",
+    bundle: true,
+    format: "esm",
+    outfile: path.join(projectRoot, "api/index.js"),
+    target: "node20",
+    define: {
+      "process.env.NODE_ENV": '"production"',
+    },
+    alias: {
+      "@shared": path.join(projectRoot, "shared"),
+    },
+    minify: true,
     logLevel: "info",
   });
 }
