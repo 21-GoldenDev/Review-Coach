@@ -83,6 +83,8 @@ This repo includes `vercel.json` with `@vercel/static-build` (frontend → `dist
 3. Run `npm run db:push` once against that database so tables exist (from your machine with `DATABASE_URL` set).
 4. Redeploy after pushing code changes.
 
+If login returns **404 NOT_FOUND** (plain Vercel error page, not JSON), the API function was not reached — redeploy after pulling the latest `vercel.json` (API routes must be listed before the `filesystem` handle).
+
 If login returns **500 / FUNCTION_INVOCATION_FAILED**, open Vercel → Deployments → Functions → Logs. Usually `DATABASE_URL` is missing or the database is unreachable without SSL.
 
 **Note:** Uploaded files are stored on disk locally; on Vercel they are ephemeral. For production uploads, use object storage (S3, etc.) later.

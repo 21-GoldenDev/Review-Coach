@@ -15,9 +15,9 @@
     }
   ],
   "routes": [
+    { "src": "/api/(.*)", "dest": "/api/index.cjs" },
+    { "src": "/uploads/(.*)", "dest": "/api/index.cjs" },
     { "handle": "filesystem" },
-    { "src": "/api/(.*)", "dest": "/api" },
-    { "src": "/uploads/(.*)", "dest": "/api" },
     { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
