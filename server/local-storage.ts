@@ -4,13 +4,18 @@ import { randomUUID } from "crypto";
 import type { Express, Response } from "express";
 import multer from "multer";
 
-const UPLOADS_DIR = path.join(process.cwd(), "uploads");
+const UPLOADS_DIR = process.env.VERCEL
+  ? path.join("/tmp", "uploads")
+  : path.join(process.cwd(), "uploads");
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
-// Ensure uploads directory exists
-if (!fs.existsSync(UPLOADS_DIR)) {
-  fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+function ensureUploadsDir(): void {
+  if (!fs.existsSync(UPLOADS_DIR)) {
+    fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+  }
 }
+
+ensureUploadsDir();
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({

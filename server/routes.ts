@@ -2,7 +2,7 @@ import type { Express, Request, Response } from "express";
 import { storage } from "./storage";
 import { api } from "@shared/routes";
 import { z } from "zod";
-import bcrypt from "bcrypt";
+import { comparePassword, hashPassword } from "./password";
 import type { User } from "@shared/schema";
 import { upload, localStorageService } from "./local-storage";
 import { insertContactSchema } from "@shared/schema";
@@ -319,7 +319,7 @@ export async function registerRoutes(app: Express): Promise<void> {
         });
       }
 
-      const hashedPassword = await bcrypt.hash(input.password, 10);
+      const hashedPassword = await hashPassword(input.password);
 
       let validatedProfilePicture: string | null = null;
       if (
@@ -384,7 +384,10 @@ export async function registerRoutes(app: Express): Promise<void> {
         });
       }
 
-      const validPassword = await bcrypt.compare(input.password, user.password);
+      const validPassword = await comparePassword(
+        input.password,
+        user.password,
+      );
       if (!validPassword) {
         return res.status(401).json({
           message: "Invalid email or password",
@@ -625,7 +628,7 @@ export async function registerRoutes(app: Express): Promise<void> {
         validatedProfilePicture = input.profilePicture;
       }
 
-      const hashedPassword = await bcrypt.hash(input.password, 10);
+      const hashedPassword = await hashPassword(input.password);
       const newUser = await storage.createUser({
         name: input.name,
         email: normalizedEmail,
@@ -701,7 +704,7 @@ export async function registerRoutes(app: Express): Promise<void> {
       if (input.isCoach !== undefined) updates.isCoach = input.isCoach;
       if (input.role !== undefined) updates.role = input.role;
       if (input.password) {
-        updates.password = await bcrypt.hash(input.password, 10);
+        updates.password = await hashPassword(input.password);
       }
       if (input.profilePicture !== undefined) {
         if (

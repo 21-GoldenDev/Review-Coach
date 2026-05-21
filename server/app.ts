@@ -2,7 +2,7 @@ import "./load-env";
 import express, { type Express, type Request, Response, NextFunction } from "express";
 import session from "express-session";
 import connectPgSimple from "connect-pg-simple";
-import bcrypt from "bcrypt";
+import { hashPassword } from "./password";
 import { createServer, type Server } from "http";
 import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
@@ -37,7 +37,7 @@ async function seedAdmin() {
   try {
     const existing = await storage.getUserByEmail(adminEmail);
     if (!existing) {
-      const hashedPassword = await bcrypt.hash(adminPassword, 10);
+      const hashedPassword = await hashPassword(adminPassword);
       await storage.createUser({
         name: "Admin",
         email: adminEmail,

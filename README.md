@@ -77,10 +77,13 @@ Uses `dist/index.cjs` and serves the built client from `dist/public`.
 This repo includes `vercel.json` so Vercel serves the React app from `dist/public` and routes `/api` and `/uploads` to a serverless function.
 
 1. Connect the GitHub repo in Vercel (Framework Preset: **Other** — do not set Output Directory to `dist` alone).
-2. Add environment variables in the Vercel project:
-   - `DATABASE_URL` — PostgreSQL connection string (e.g. Neon)
-   - `SESSION_SECRET` — long random string
-3. Redeploy after pushing these changes.
+2. Add environment variables in the Vercel project (Settings → Environment Variables), then redeploy:
+   - `DATABASE_URL` — PostgreSQL connection string (e.g. Neon). Use the pooled URL and include `?sslmode=require` if needed.
+   - `SESSION_SECRET` — long random string (same value you use locally)
+3. Run `npm run db:push` once against that database so tables exist (from your machine with `DATABASE_URL` set).
+4. Redeploy after pushing code changes.
+
+If login returns **500 / FUNCTION_INVOCATION_FAILED**, open Vercel → Deployments → Functions → Logs. Usually `DATABASE_URL` is missing or the database is unreachable without SSL.
 
 **Note:** Uploaded files are stored on disk locally; on Vercel they are ephemeral. For production uploads, use object storage (S3, etc.) later.
 
