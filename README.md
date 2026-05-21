@@ -72,6 +72,25 @@ npm start
 
 Uses `dist/index.cjs` and serves the built client from `dist/public`.
 
+## Deploy on Vercel
+
+This repo includes `vercel.json` with `@vercel/static-build` (frontend → `dist/public`) and a bundled `api/index.cjs` (Express API, built during install/build). Requires Node 20.19+ for Vite 7. Set `DATABASE_URL` and `SESSION_SECRET` on Vercel; run `npm run db:push` against that database. Mark coaches as **featured** in the admin dashboard for them to appear on the home page.
+
+1. Connect the GitHub repo in Vercel (Framework Preset: **Other** — do not set Output Directory to `dist` alone).
+2. Add environment variables in the Vercel project (Settings → Environment Variables), then redeploy:
+   - `DATABASE_URL` — PostgreSQL connection string (e.g. Neon). Use the pooled URL and include `?sslmode=require` if needed.
+   - `SESSION_SECRET` — long random string (same value you use locally)
+3. Run `npm run db:push` once against that database so tables exist (from your machine with `DATABASE_URL` set).
+4. Redeploy after pushing code changes.
+
+If login returns **404 NOT_FOUND** (plain Vercel error page, not JSON), the API function was not reached — redeploy after pulling the latest `vercel.json` (API routes must be listed before the `filesystem` handle).
+
+If login returns **500 / FUNCTION_INVOCATION_FAILED**, open Vercel → Deployments → Functions → Logs. Usually `DATABASE_URL` is missing or the database is unreachable without SSL.
+
+**Note:** Uploaded files are stored on disk locally; on Vercel they are ephemeral. For production uploads, use object storage (S3, etc.) later.
+
+For a traditional single-port server (Railway, Render, Fly.io), use `npm run build` and `npm start` instead.
+
 ## Scripts
 
 | Command        | Description                          |
