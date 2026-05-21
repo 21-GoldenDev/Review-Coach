@@ -2,7 +2,7 @@ import { build as esbuild } from "esbuild";
 import { build as viteBuild } from "vite";
 import path from "path";
 import { fileURLToPath } from "url";
-import { rm, readFile, mkdir } from "fs/promises";
+import { rm, readFile, mkdir, unlink } from "fs/promises";
 
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -66,12 +66,15 @@ async function buildAll() {
   });
 
   console.log("building Vercel API...");
+  for (const stale of ["api/index.cjs", "api/index.js"]) {
+    await unlink(path.join(projectRoot, stale)).catch(() => {});
+  }
   await esbuild({
     entryPoints: [path.join(projectRoot, "server/vercel.ts")],
     platform: "node",
     bundle: true,
     format: "cjs",
-    outfile: path.join(projectRoot, "api/index.cjs"),
+    outfile: path.join(projectRoot, "api/[...path].cjs"),
     target: "node20",
     define: {
       "process.env.NODE_ENV": '"production"',
