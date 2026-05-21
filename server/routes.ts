@@ -1,5 +1,4 @@
 import type { Express, Request, Response } from "express";
-import type { Server } from "http";
 import { storage } from "./storage";
 import { api } from "@shared/routes";
 import { z } from "zod";
@@ -28,10 +27,7 @@ async function requireAdmin(
   return user;
 }
 
-export async function registerRoutes(
-  httpServer: Server,
-  app: Express,
-): Promise<Server> {
+export async function registerRoutes(app: Express): Promise<void> {
   // File upload endpoint for presigned URL flow replacement
   app.post("/api/uploads/request-url", async (req, res) => {
     try {
@@ -896,5 +892,4 @@ export async function registerRoutes(
     }
   });
 
-  return httpServer;
 }

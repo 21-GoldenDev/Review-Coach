@@ -72,6 +72,20 @@ npm start
 
 Uses `dist/index.cjs` and serves the built client from `dist/public`.
 
+## Deploy on Vercel
+
+This repo includes `vercel.json` so Vercel serves the React app from `dist/public` and routes `/api` and `/uploads` to a serverless function.
+
+1. Connect the GitHub repo in Vercel (Framework Preset: **Other** — do not set Output Directory to `dist` alone).
+2. Add environment variables in the Vercel project:
+   - `DATABASE_URL` — PostgreSQL connection string (e.g. Neon)
+   - `SESSION_SECRET` — long random string
+3. Redeploy after pushing these changes.
+
+**Note:** Uploaded files are stored on disk locally; on Vercel they are ephemeral. For production uploads, use object storage (S3, etc.) later.
+
+For a traditional single-port server (Railway, Render, Fly.io), use `npm run build` and `npm start` instead.
+
 ## Scripts
 
 | Command        | Description                          |
