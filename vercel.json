@@ -1,5 +1,6 @@
 {
   "version": 2,
+  "installCommand": "npm install --include=dev && node script/build-api.mjs",
   "builds": [
     {
       "src": "package.json",
@@ -9,7 +10,7 @@
       }
     },
     {
-      "src": "api/index.ts",
+      "src": "api/index.cjs",
       "use": "@vercel/node"
     }
   ],

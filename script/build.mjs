@@ -3,6 +3,7 @@ import { build as viteBuild } from "vite";
 import path from "path";
 import { fileURLToPath } from "url";
 import { rm, readFile } from "fs/promises";
+import { buildVercelApi } from "./build-api.mjs";
 
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -64,7 +65,7 @@ async function buildAll() {
     logLevel: "info",
   });
 
-  // API is deployed via committed api/index.ts (Vercel @vercel/node compiles it).
+  await buildVercelApi();
 }
 
 buildAll().catch((err) => {

@@ -74,7 +74,7 @@ Uses `dist/index.cjs` and serves the built client from `dist/public`.
 
 ## Deploy on Vercel
 
-This repo includes `vercel.json` with `@vercel/static-build` (frontend → `dist/public`) and `@vercel/node` (`api/index.ts` → Express API). Requires Node 20.19+ for Vite 7. Set `DATABASE_URL` and `SESSION_SECRET` on Vercel; run `npm run db:push` against that database. Mark coaches as **featured** in the admin dashboard for them to appear on the home page.
+This repo includes `vercel.json` with `@vercel/static-build` (frontend → `dist/public`) and a bundled `api/index.cjs` (Express API, built during install/build). Requires Node 20.19+ for Vite 7. Set `DATABASE_URL` and `SESSION_SECRET` on Vercel; run `npm run db:push` against that database. Mark coaches as **featured** in the admin dashboard for them to appear on the home page.
 
 1. Connect the GitHub repo in Vercel (Framework Preset: **Other** — do not set Output Directory to `dist` alone).
 2. Add environment variables in the Vercel project (Settings → Environment Variables), then redeploy:
