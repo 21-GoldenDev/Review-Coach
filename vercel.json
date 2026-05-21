@@ -1,12 +1,22 @@
 {
   "version": 2,
-  "buildCommand": "npm run build",
-  "installCommand": "npm install --include=dev",
-  "outputDirectory": "dist/public",
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist/public"
+      }
+    },
+    {
+      "src": "api/index.ts",
+      "use": "@vercel/node"
+    }
+  ],
   "routes": [
     { "handle": "filesystem" },
-    { "src": "/api/(.*)", "dest": "/api/index.cjs" },
-    { "src": "/uploads/(.*)", "dest": "/api/index.cjs" },
+    { "src": "/api/(.*)", "dest": "/api" },
+    { "src": "/uploads/(.*)", "dest": "/api" },
     { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
