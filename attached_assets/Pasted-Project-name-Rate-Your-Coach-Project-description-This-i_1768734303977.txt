@@ -1,0 +1,139 @@
+Project name: Rate Your Coach
+
+Project description:
+This is a professional coach reviewing platform focused on transparency, trust, and real athlete experiences.
+First, I only want to design a clean, minimal, and visually attractive homepage UI. Logo has been attached.
+
+Tech stack
+- Frontend: React
+- Backend: Node
+- Database: SQLite
+
+GLOBAL DESIGN SYSTEM (FOLLOW BY DEFAULT)
+
+Colors
+- Header background: #202020
+- Global primary text color: #333333
+- Secondary text: #666666
+- Borders: rgba(0, 0, 0, 0.08)
+
+ Typography
+- Font family: Montserrat (Google Font)
+- Hero headline: 800
+- Buttons & navigation: 500–600
+- Body text: 400
+
+
+ IMPORTANT OVERRIDE RULE
+**Do NOT apply global button styles to the following buttons:**
+- Sign in
+- Join Free
+- Write a Review
+- Search
+
+These buttons MUST use **custom styles defined below**, even if global button styles exist.
+
+ HEADER
+
+- Full-width header
+- Height: 70–80px
+- Background: #202020
+- Logo on the left (no text around)
+- Right side buttons (custom styled):
+  - Write a Review
+  - Sign in
+  - Register
+
+ CUSTOM BUTTON STYLES (MATCH IMAGE EXACTLY)
+
+Write a Review (PRIMARY)
+- Background color: #F5C518 
+- Text color: #111111
+- Font weight: 600
+- Subtle shadow
+- Most visually prominent button
+
+Hover
+- Background darkens slightly (#E6B800)
+- Subtle scale (1.03)
+- Shadow increases slightly
+- Text color remains dark
+
+-Sign in (SECONDARY – DARK)
+- Background: **#1F1F1F**
+- Border: 1px solid rgba(255,255,255,0.15)
+- Text color: **#FFFFFF**
+- Subtle shadow
+
+**Hover**
+- Background: #2A2A2A
+- Subtle scale
+- Text color remains white
+
+-Register (SECONDARY – LIGHT)
+- Background: **#FFFFFF**
+- Border: 1px solid rgba(0,0,0,0.15)
+- Text color: **#111111**
+- Subtle shadow
+
+Hover
+- Background: #F7F7F7
+- Subtle scale
+- Text color remains dark
+
+HERO SECTION
+
+Headline (centered, bold)
+Rate My Coach
+
+- Font weight: 800
+- Color: #202020
+
+Sub-headline
+Read real, honest reviews from athletes before you commit.
+
+- Lighter weight
+- Secondary text color
+
+SEARCH AREA
+
+Search Input
+- Large, wide input
+- Placeholder:
+  **Search by coach name
+- White background
+- Rounded corners
+- Subtle border
+
+Search Button (CUSTOM STYLE)
+- Background: **#F5C518**
+- Text color: **#111111**
+- Font weight: 600
+
+Hover
+- Background darkens slightly
+- Subtle scale
+- Shadow increase
+
+HELPER LINKS
+- Fitness Coach
+- Football Coach
+- Personal Trainer
+
+Hover
+- Text color changes to #F5C518
+
+
+TRUST SIGNAL
+⭐⭐⭐⭐⭐ Trusted by athletes across 1000+ sports
+
+- Small
+- Centered
+- Non-distracting
+
+STRICT RULES
+- UI only
+- No backend
+- No extra sections
+- No heavy animations
+- Match visual hierarchy and spacing from a Figma-quality homepage

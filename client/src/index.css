@@ -1,0 +1,81 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-sans: 'Montserrat', sans-serif;
+
+  /* Design System Colors */
+  --header-bg: 0 0% 12.5%;    /* #202020 */
+  --primary-yellow: 47 91% 53%; /* #F5C518 */
+  --primary-yellow-hover: 48 100% 45%; /* #E6B800 */
+  
+  --text-primary: 0 0% 20%;   /* #333333 */
+  --text-secondary: 0 0% 40%; /* #666666 */
+  
+  --background: 0 0% 98%;
+  --foreground: 0 0% 20%;
+  
+  --card: 0 0% 100%;
+  --card-foreground: 0 0% 20%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 0 0% 20%;
+  
+  --primary: 47 91% 53%;
+  --primary-foreground: 0 0% 7%;
+  
+  --secondary: 0 0% 12%;      /* #1F1F1F for secondary buttons */
+  --secondary-foreground: 0 0% 98%;
+  
+  --muted: 0 0% 96%;
+  --muted-foreground: 0 0% 45%;
+  
+  --accent: 47 91% 53%;
+  --accent-foreground: 0 0% 7%;
+  
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 0 0% 98%;
+
+  --border: 0 0% 92%;         /* rgba(0,0,0,0.08) approx */
+  --input: 0 0% 89.8%;
+  --ring: 47 91% 53%;
+  
+  --radius: 0.5rem;
+}
+
+@layer base {
+  body {
+    @apply bg-background text-foreground antialiased font-sans;
+  }
+}
+
+/* Custom utilities for strict design adherence */
+@layer components {
+  .btn-primary-yellow {
+    @apply bg-[hsl(var(--primary-yellow))] text-[#111111] font-semibold 
+           shadow-sm hover:bg-[hsl(var(--primary-yellow-hover))] 
+           hover:scale-[1.02] active:scale-[0.98] transition-all duration-200;
+  }
+
+  .btn-secondary-dark {
+    @apply bg-[#1F1F1F] text-white border border-white/15 
+           hover:bg-[#2A2A2A] hover:scale-[1.02] active:scale-[0.98] 
+           transition-all duration-200;
+  }
+
+  .btn-secondary-light {
+    @apply bg-white text-[#111111] border border-black/15 
+           hover:bg-[#F7F7F7] hover:scale-[1.02] active:scale-[0.98] 
+           transition-all duration-200;
+  }
+  
+  .text-header-primary {
+    @apply text-[#202020] font-extrabold;
+  }
+  
+  .text-body-secondary {
+    @apply text-[#666666] font-normal;
+  }
+}
