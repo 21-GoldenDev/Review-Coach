@@ -146,10 +146,9 @@ export async function registerRoutes(app: Express): Promise<void> {
 
   app.get("/api/stats", async (req, res) => {
     try {
-      const coaches = await storage.getCoaches();
-      const coachCount = coaches.length;
-      const athletes = await storage.getAthleteCount();
-      res.json({ coachCount, athleteCount: athletes });
+      const coachCount = await storage.getCoachUserCount();
+      const athleteCount = await storage.getAthleteCount();
+      res.json({ coachCount, athleteCount });
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch stats" });
     }

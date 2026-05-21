@@ -260,6 +260,7 @@ export function AdminUsersPanel() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
       setDialogOpen(false);
       toast({
         title: "User Created",
@@ -291,6 +292,7 @@ export function AdminUsersPanel() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
       setDialogOpen(false);
       setEditingUser(null);
       toast({
@@ -343,6 +345,7 @@ export function AdminUsersPanel() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
       setDeleteTarget(null);
       toast({ title: "User Deleted", description: "The user has been removed." });
     },

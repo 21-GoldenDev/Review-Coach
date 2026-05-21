@@ -80,6 +80,7 @@ export interface IStorage {
   getAllUsers(): Promise<AdminUser[]>;
   deleteUser(id: number): Promise<boolean>;
   getAthleteCount(): Promise<number>;
+  getCoachUserCount(): Promise<number>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -346,6 +347,11 @@ export class DatabaseStorage implements IStorage {
 
   async getAthleteCount(): Promise<number> {
     const result = await db.select({ count: sql<number>`count(*)` }).from(users).where(eq(users.isAthlete, true));
+    return Number(result[0]?.count ?? 0);
+  }
+
+  async getCoachUserCount(): Promise<number> {
+    const result = await db.select({ count: sql<number>`count(*)` }).from(users).where(eq(users.isCoach, true));
     return Number(result[0]?.count ?? 0);
   }
 }

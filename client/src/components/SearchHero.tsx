@@ -48,6 +48,7 @@ export function SearchHero() {
       if (!res.ok) throw new Error("Failed to fetch stats");
       return res.json();
     },
+    staleTime: 0,
   });
 
   const { data: searchResults, isLoading } = useQuery<CoachWithRating[]>({

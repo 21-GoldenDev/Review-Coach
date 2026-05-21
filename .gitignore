@@ -6,8 +6,4 @@ server/public
 vite.config.ts.*
 *.tar.gz
 uploads/
-<<<<<<< HEAD
 .env
-=======
-.env
->>>>>>> 2cf75671aa9b5b5c65c5279eb04e79f28c15cd0c
