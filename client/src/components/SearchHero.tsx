@@ -49,6 +49,7 @@ export function SearchHero() {
       return res.json();
     },
     staleTime: 0,
+    refetchOnMount: "always",
   });
 
   const { data: searchResults, isLoading } = useQuery<CoachWithRating[]>({

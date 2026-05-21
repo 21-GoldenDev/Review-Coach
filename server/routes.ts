@@ -146,6 +146,7 @@ export async function registerRoutes(app: Express): Promise<void> {
 
   app.get("/api/stats", async (req, res) => {
     try {
+      res.set("Cache-Control", "no-store");
       const coachCount = await storage.getCoachUserCount();
       const athleteCount = await storage.getAthleteCount();
       res.json({ coachCount, athleteCount });
