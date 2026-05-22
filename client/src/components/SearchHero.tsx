@@ -144,7 +144,8 @@ export function SearchHero() {
           >
             <img
               src="/ads/left-ad.jpg"
-              className="w-full h-[500px] object-cover opacity-40 hover:opacity-70 transition rounded-lg"
+              alt="Advertisement"
+              className="w-full max-h-[500px] h-auto object-contain opacity-40 hover:opacity-70 transition rounded-lg"
             />
           </a>
           <button

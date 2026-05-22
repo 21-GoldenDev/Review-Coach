@@ -5,7 +5,7 @@ export function SidebarAd({ side }: { side: "left" | "right" }) {
         <img
           src={side === "left" ? "/ads/left-ad.jpg" : "/ads/right-ad.jpg"}
           alt="Advertisement"
-          className="w-full h-full object-cover"
+          className={side === "left" ? "w-full h-full object-contain" : "w-full h-full object-cover"}
         />
       </a>
     </div>
