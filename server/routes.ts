@@ -1,10 +1,10 @@
-import type { Express, Request, Response } from "express";
+import express, { type Express, Request, Response } from "express";
 import { storage } from "./storage";
 import { api } from "@shared/routes";
 import { z } from "zod";
 import { comparePassword, hashPassword } from "./password";
 import type { User } from "@shared/schema";
-import { upload, localStorageService } from "./local-storage";
+import { upload, localStorageService, UPLOADS_DIR } from "./local-storage";
 import { insertContactSchema } from "@shared/schema";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
@@ -122,26 +122,21 @@ export async function registerRoutes(app: Express): Promise<void> {
     }
   });
 
-  // File serving endpoint - handle both /uploads/filename and /uploads/subdir/filename
-  app.get("/uploads/:subdir/:filename", async (req, res) => {
-    try {
-      const filePath = `${req.params.subdir}/${req.params.filename}`;
-      await localStorageService.serveFile(filePath, res);
-    } catch (error) {
-      console.error("Error serving file:", error);
-      res.status(500).json({ error: "Failed to serve file" });
-    }
-  });
-
-  // Fallback for /uploads/filename (single-level paths)
-  app.get("/uploads/:filename", async (req, res) => {
-    try {
-      const filePath = `avatars/${req.params.filename}`;
-      await localStorageService.serveFile(filePath, res);
-    } catch (error) {
-      console.error("Error serving file:", error);
-      res.status(500).json({ error: "Failed to serve file" });
-    }
+  // Serve uploaded files from disk (profile photos, proof attachments, etc.)
+  app.use(
+    "/uploads",
+    express.static(UPLOADS_DIR, {
+      maxAge: "1h",
+      setHeaders(res, filePath) {
+        if (/\.(jpe?g|png|gif|webp)$/i.test(filePath)) {
+          res.setHeader("Content-Disposition", "inline");
+        }
+      },
+    }),
+  );
+  // Do not fall through to the SPA when a file is missing
+  app.use("/uploads", (_req, res) => {
+    res.status(404).send("File not found");
   });
 
   app.get("/api/stats", async (req, res) => {

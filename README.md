@@ -89,7 +89,38 @@ If login returns **500 / FUNCTION_INVOCATION_FAILED**, open Vercel → Deploymen
 
 **Note:** Uploaded files are stored on disk locally; on Vercel they are ephemeral. For production uploads, use object storage (S3, etc.) later.
 
-For a traditional single-port server (Railway, Render, Fly.io), use `npm run build` and `npm start` instead.
+For a traditional single-port server (Railway, Render, Fly.io, Linux VPS), use `npm run build` and `npm start` instead.
+
+### Deploy on a Linux VPS (nginx)
+
+Profile photos and other uploads are stored on disk under `uploads/` (not in git). The app serves them at `/uploads/...`.
+
+1. Run the app with `npm run build` then `npm start` (or PM2). Set `NODE_ENV=production`, `DATABASE_URL`, and `SESSION_SECRET` in `.env`.
+2. Optional: set `UPLOADS_DIR` to a persistent path outside the deploy folder (e.g. `/var/lib/ratemycoach/uploads`) so redeploys do not delete photos.
+3. **nginx must proxy both the API and uploads to Node.** If nginx only proxies `/api` or only serves `dist/public`, photo URLs will break (often showing a broken image after profile update).
+
+Example nginx site config (replace port and domain):
+
+```nginx
+server {
+    listen 80;
+    server_name yourdomain.com;
+
+    location / {
+        proxy_pass http://127.0.0.1:5000;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        client_max_body_size 10M;
+    }
+}
+```
+
+Do **not** use `try_files ... /index.html` for `/uploads` on nginx; let Node handle those paths.
+
+After changing a photo, verify the file exists on the server, e.g. `ls uploads/avatars/` (or under `UPLOADS_DIR`), and open the image URL in the browser: `https://yourdomain.com/uploads/avatars/<filename>`.
 
 ## Scripts
 

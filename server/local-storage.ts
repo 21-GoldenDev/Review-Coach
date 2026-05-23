@@ -4,9 +4,11 @@ import { randomUUID } from "crypto";
 import type { Express, Response } from "express";
 import multer from "multer";
 
-const UPLOADS_DIR = process.env.VERCEL
-  ? path.join("/tmp", "uploads")
-  : path.join(process.cwd(), "uploads");
+export const UPLOADS_DIR = process.env.UPLOADS_DIR
+  ? path.resolve(process.env.UPLOADS_DIR)
+  : process.env.VERCEL
+    ? path.join("/tmp", "uploads")
+    : path.join(process.cwd(), "uploads");
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
 function ensureUploadsDir(): void {
@@ -101,10 +103,14 @@ export class LocalStorageService {
    * Serve file from local storage
    */
   async serveFile(filePath: string, res: Response): Promise<void> {
-    const fullPath = path.join(UPLOADS_DIR, filePath);
+    const fullPath = path.resolve(UPLOADS_DIR, filePath);
+    const uploadsRoot = path.resolve(UPLOADS_DIR);
 
     // Prevent directory traversal attacks
-    if (!fullPath.startsWith(UPLOADS_DIR)) {
+    if (
+      fullPath !== uploadsRoot &&
+      !fullPath.startsWith(uploadsRoot + path.sep)
+    ) {
       res.status(403).json({ error: "Access denied" });
       return;
     }
@@ -130,11 +136,14 @@ export class LocalStorageService {
 
       const contentType = mimeTypes[ext] || "application/octet-stream";
 
+      const isImage = [".jpg", ".jpeg", ".png", ".webp", ".gif"].includes(ext);
       res.set({
         "Content-Type": contentType,
         "Content-Length": stat.size,
         "Cache-Control": "public, max-age=3600",
-        "Content-Disposition": `attachment; filename="${filename}"`,
+        "Content-Disposition": isImage
+          ? "inline"
+          : `attachment; filename="${filename}"`,
       });
 
       const stream = fs.createReadStream(fullPath);

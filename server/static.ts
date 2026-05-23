@@ -12,13 +12,16 @@ export function serveStatic(app: Express) {
 
   app.use(express.static(distPath));
 
-  // fall through to index.html for client routes only (never for /api)
+  // fall through to index.html for client routes only (never for /api or /uploads)
   app.use("/{*path}", (req, res) => {
     if (req.path.startsWith("/api")) {
       return res.status(404).json({
         message:
           "API endpoint not found. Rebuild the server (npm run build) and restart.",
       });
+    }
+    if (req.path.startsWith("/uploads")) {
+      return res.status(404).send("File not found");
     }
     res.sendFile(path.resolve(distPath, "index.html"));
   });

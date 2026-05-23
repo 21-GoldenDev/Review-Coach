@@ -316,10 +316,14 @@ export default function Profile() {
             {/* Submit Button */}
             <button
               type="submit"
-              disabled={updateProfileMutation.isPending}
+              disabled={updateProfileMutation.isPending || isUploading}
               className="w-full bg-[#F5C518] text-[#202020] py-3 px-4 rounded-lg font-semibold hover:bg-[#E5C518] focus:ring-2 focus:ring-[#F5C518] focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             >
-              {updateProfileMutation.isPending ? "Updating..." : "Update Profile"}
+              {isUploading
+                ? "Uploading photo..."
+                : updateProfileMutation.isPending
+                  ? "Updating..."
+                  : "Update Profile"}
             </button>
           </form>
 
