@@ -11,9 +11,17 @@ export const UPLOADS_DIR = process.env.UPLOADS_DIR
     : path.join(process.cwd(), "uploads");
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
+const UPLOAD_SUBDIRS = ["avatars", "temp", "files"] as const;
+
 function ensureUploadsDir(): void {
   if (!fs.existsSync(UPLOADS_DIR)) {
     fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+  }
+  for (const subdir of UPLOAD_SUBDIRS) {
+    const dir = path.join(UPLOADS_DIR, subdir);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
   }
 }
 

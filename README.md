@@ -91,36 +91,38 @@ If login returns **500 / FUNCTION_INVOCATION_FAILED**, open Vercel → Deploymen
 
 For a traditional single-port server (Railway, Render, Fly.io, Linux VPS), use `npm run build` and `npm start` instead.
 
-### Deploy on a Linux VPS (nginx)
+### Deploy on a Linux VPS (quick start)
 
-Profile photos and other uploads are stored on disk under `uploads/` (not in git). The app serves them at `/uploads/...`.
+Profile photos are stored on disk (not in git) and served at `/uploads/...`. Use the included scripts so uploads survive redeploys.
 
-1. Run the app with `npm run build` then `npm start` (or PM2). Set `NODE_ENV=production`, `DATABASE_URL`, and `SESSION_SECRET` in `.env`.
-2. Optional: set `UPLOADS_DIR` to a persistent path outside the deploy folder (e.g. `/var/lib/ratemycoach/uploads`) so redeploys do not delete photos.
-3. **nginx must proxy both the API and uploads to Node.** If nginx only proxies `/api` or only serves `dist/public`, photo URLs will break (often showing a broken image after profile update).
+**First time on the VPS** (after `git clone` and `npm install`):
 
-Example nginx site config (replace port and domain):
-
-```nginx
-server {
-    listen 80;
-    server_name yourdomain.com;
-
-    location / {
-        proxy_pass http://127.0.0.1:5000;
-        proxy_http_version 1.1;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        client_max_body_size 10M;
-    }
-}
+```bash
+chmod +x script/setup-vps.sh script/deploy-vps.sh
+cp .env.production.example .env   # edit DATABASE_URL + SESSION_SECRET
+npm run setup:vps                 # creates /var/lib/ratemycoach/uploads and sets UPLOADS_DIR in .env
+npm run db:push
+npm run deploy:vps                # build + start/restart PM2 if installed
 ```
 
-Do **not** use `try_files ... /index.html` for `/uploads` on nginx; let Node handle those paths.
+**Every update** (after `git pull`):
 
-After changing a photo, verify the file exists on the server, e.g. `ls uploads/avatars/` (or under `UPLOADS_DIR`), and open the image URL in the browser: `https://yourdomain.com/uploads/avatars/<filename>`.
+```bash
+npm run deploy:vps
+```
+
+**nginx** — proxy the whole site to Node (do not serve `dist/public` alone):
+
+```bash
+# Edit deploy/nginx-ratemycoach.conf (set YOUR_DOMAIN), then:
+sudo cp deploy/nginx-ratemycoach.conf /etc/nginx/sites-available/ratemycoach
+sudo ln -sf /etc/nginx/sites-available/ratemycoach /etc/nginx/sites-enabled/
+sudo nginx -t && sudo systemctl reload nginx
+```
+
+**PM2** (optional): `pm2 start ecosystem.config.cjs && pm2 save && pm2 startup`
+
+**Verify photos:** `ls /var/lib/ratemycoach/uploads/avatars/` and open `https://yourdomain.com/uploads/avatars/<filename>` in the browser.
 
 ## Scripts
 
@@ -131,6 +133,8 @@ After changing a photo, verify the file exists on the server, e.g. `ls uploads/a
 | `npm start`    | Run production build                 |
 | `npm run db:push` | Apply schema to PostgreSQL        |
 | `npm run check`| TypeScript check                     |
+| `npm run setup:vps` | Create `/var/lib/ratemycoach/uploads`, configure `.env` (Linux) |
+| `npm run deploy:vps` | Build and restart app on VPS after `git pull` |
 
 ## Troubleshooting
 

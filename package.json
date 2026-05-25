@@ -13,7 +13,9 @@
     "start": "cross-env NODE_ENV=production node dist/index.cjs",
     "check": "tsc",
     "db:push": "drizzle-kit push",
-    "db:featured": "tsx script/add-is-featured.ts"
+    "db:featured": "tsx script/add-is-featured.ts",
+    "setup:vps": "bash script/setup-vps.sh",
+    "deploy:vps": "bash script/deploy-vps.sh"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

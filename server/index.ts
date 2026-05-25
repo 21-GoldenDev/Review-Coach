@@ -1,4 +1,5 @@
 import { createApp, log } from "./app";
+import { UPLOADS_DIR } from "./local-storage";
 
 (async () => {
   const { httpServer } = await createApp();
@@ -11,6 +12,7 @@ import { createApp, log } from "./app";
     },
     () => {
       log(`serving on port ${port}`);
+      log(`uploads directory: ${UPLOADS_DIR}`);
     },
   );
 })();

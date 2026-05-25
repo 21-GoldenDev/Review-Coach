@@ -1,0 +1,26 @@
+# systemd unit for Rate My Coach
+#
+# 1. Replace /home/deploy/ratemycoach with your app directory
+# 2. Replace User=deploy with your Linux user
+# 3. sudo cp deploy/ratemycoach.service /etc/systemd/system/ratemycoach.service
+# 4. sudo systemctl daemon-reload
+# 5. sudo systemctl enable --now ratemycoach
+#
+# Requires: npm run build, .env with DATABASE_URL, SESSION_SECRET, UPLOADS_DIR
+
+[Unit]
+Description=Rate My Coach web app
+After=network.target
+
+[Service]
+Type=simple
+User=deploy
+WorkingDirectory=/home/deploy/ratemycoach
+Environment=NODE_ENV=production
+EnvironmentFile=/home/deploy/ratemycoach/.env
+ExecStart=/usr/bin/node /home/deploy/ratemycoach/dist/index.cjs
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
