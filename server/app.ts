@@ -122,6 +122,15 @@ export async function createApp(): Promise<AppBundle> {
   await registerRoutes(app);
   await seedAdmin();
 
+  try {
+    const cleared = await storage.clearOrphanFeaturedCoaches();
+    if (cleared > 0) {
+      log(`Cleared featured flag from ${cleared} unlinked coach profile(s)`);
+    }
+  } catch (err) {
+    console.error("Failed to clear orphan featured coaches:", err);
+  }
+
   app.use((err: any, _req: Request, res: Response, next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";

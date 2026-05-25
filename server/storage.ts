@@ -13,7 +13,7 @@ import {
   type User,
   type ContactSubmission
 } from "@shared/schema";
-import { and, desc, eq, ilike, sql } from "drizzle-orm";
+import { and, desc, eq, ilike, inArray, isNull, ne, or, sql } from "drizzle-orm";
 
 export interface PendingReview {
   id: number;
@@ -81,6 +81,7 @@ export interface IStorage {
   deleteUser(id: number): Promise<boolean>;
   getAthleteCount(): Promise<number>;
   getCoachUserCount(): Promise<number>;
+  clearOrphanFeaturedCoaches(): Promise<number>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -142,22 +143,56 @@ export class DatabaseStorage implements IStorage {
       .set({ isFeatured })
       .where(eq(coaches.id, coach.id))
       .returning();
+    if (!updated) return undefined;
+
+    // Clear stale featured flags on orphan/unlinked duplicate coach rows (e.g. from review approval).
+    await db
+      .update(coaches)
+      .set({ isFeatured: false })
+      .where(
+        and(
+          ilike(coaches.name, coach.name),
+          ne(coaches.id, coach.id),
+          or(isNull(coaches.userId), ne(coaches.userId, userId)),
+        ),
+      );
+
     return updated;
   }
 
   async getCoachesWithRatings(search?: string, featuredOnly?: boolean): Promise<CoachWithRating[]> {
-    const conditions = [];
-    if (search) {
-      conditions.push(ilike(coaches.name, `%${search}%`));
-    }
-    if (featuredOnly) {
-      conditions.push(eq(coaches.isFeatured, true));
-    }
+    let coachList: Coach[];
 
-    const coachList =
-      conditions.length > 0
-        ? await db.select().from(coaches).where(and(...conditions))
-        : await db.select().from(coaches);
+    if (featuredOnly) {
+      const featuredRows = await db
+        .select()
+        .from(coaches)
+        .where(eq(coaches.isFeatured, true));
+
+      const linkedRows = featuredRows.filter((c) => c.userId != null);
+      if (linkedRows.length === 0) {
+        coachList = [];
+      } else {
+        const userIds = Array.from(new Set(linkedRows.map((c) => c.userId!)));
+        const coachUsers = await db
+          .select({ id: users.id })
+          .from(users)
+          .where(and(inArray(users.id, userIds), eq(users.isCoach, true)));
+
+        const validUserIds = new Set(coachUsers.map((u) => u.id));
+        coachList = linkedRows.filter((c) => validUserIds.has(c.userId!));
+      }
+    } else {
+      const conditions = [];
+      if (search) {
+        conditions.push(ilike(coaches.name, `%${search}%`));
+      }
+
+      coachList =
+        conditions.length > 0
+          ? await db.select().from(coaches).where(and(...conditions))
+          : await db.select().from(coaches);
+    }
 
     // Get all approved reviews
     const approvedReviews = await db
@@ -320,19 +355,15 @@ export class DatabaseStorage implements IStorage {
       .from(coaches);
 
     const featuredByUserId = new Map<number, boolean>();
-    const featuredByName = new Map<string, boolean>();
     for (const row of coachRows) {
-      if (row.isFeatured) {
-        if (row.userId != null) featuredByUserId.set(row.userId, true);
-        if (row.name) featuredByName.set(row.name.toLowerCase(), true);
+      if (row.isFeatured && row.userId != null) {
+        featuredByUserId.set(row.userId, true);
       }
     }
 
     return userList.map((u) => ({
       ...u,
-      isFeatured:
-        featuredByUserId.get(u.id) === true ||
-        (u.isCoach === true && featuredByName.get(u.name.toLowerCase()) === true),
+      isFeatured: u.isCoach === true && featuredByUserId.get(u.id) === true,
     }));
   }
 
@@ -353,6 +384,15 @@ export class DatabaseStorage implements IStorage {
   async getCoachUserCount(): Promise<number> {
     const result = await db.select({ count: sql<number>`count(*)` }).from(users).where(eq(users.isCoach, true));
     return Number(result[0]?.count ?? 0);
+  }
+
+  async clearOrphanFeaturedCoaches(): Promise<number> {
+    const cleared = await db
+      .update(coaches)
+      .set({ isFeatured: false })
+      .where(and(isNull(coaches.userId), eq(coaches.isFeatured, true)))
+      .returning({ id: coaches.id });
+    return cleared.length;
   }
 }
 
