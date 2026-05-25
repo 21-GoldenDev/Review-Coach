@@ -3,9 +3,9 @@ export function SidebarAd({ side }: { side: "left" | "right" }) {
     <div className="w-full h-[600px] overflow-hidden rounded-lg shadow-md">
       <a href="#" target="_blank" className="block w-full h-full">
         <img
-          src={side === "left" ? "/ads/left-ad.jpg" : "/ads/right-ad.jpg"}
+          src="/ads/left-ad.jpg"
           alt="Advertisement"
-          className={side === "left" ? "w-full h-full object-contain" : "w-full h-full object-cover"}
+          className="w-full h-full object-contain"
         />
       </a>
     </div>
