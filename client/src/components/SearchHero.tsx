@@ -15,7 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { apiRequest } from "@/lib/queryClient";
+import { submitAdvertiseForm } from "@/lib/advertise-form";
 import { useToast } from "@/hooks/use-toast";
 
 interface CoachWithRating {
@@ -34,6 +34,7 @@ export function SearchHero() {
   const searchRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const [isAdvertiseOpen, setIsAdvertiseOpen] = useState(false);
+  const [advertiseFullName, setAdvertiseFullName] = useState("");
   const [advertiseEmail, setAdvertiseEmail] = useState("");
   const [advertiseBody, setAdvertiseBody] = useState("");
   const [isAdvertiseSending, setIsAdvertiseSending] = useState(false);
@@ -104,17 +105,19 @@ export function SearchHero() {
     const subject = "I want to show ad";
     setIsAdvertiseSending(true);
     try {
-      await apiRequest("POST", "/api/advertise", {
-        fromEmail: advertiseEmail,
+      await submitAdvertiseForm({
+        fullName: advertiseFullName.trim(),
+        fromEmail: advertiseEmail.trim(),
         subject,
-        body: advertiseBody,
+        body: advertiseBody.trim(),
       });
 
       toast({
-        title: "Message sent!",
-        description: "We received your advertising request.",
+        title: "Your request has been sent!",
+        description: "We will process your advertising request as soon as possible.",
       });
 
+      setAdvertiseFullName("");
       setAdvertiseEmail("");
       setAdvertiseBody("");
       setIsAdvertiseOpen(false);
@@ -329,12 +332,24 @@ export function SearchHero() {
 
             <div className="space-y-4">
               <div className="space-y-2">
+                <label className="text-sm font-medium">Full name</label>
+                <Input
+                  type="text"
+                  value={advertiseFullName}
+                  onChange={(e) => setAdvertiseFullName(e.target.value)}
+                  placeholder="Jane Smith"
+                  autoComplete="name"
+                />
+              </div>
+
+              <div className="space-y-2">
                 <label className="text-sm font-medium">Your Email</label>
                 <Input
                   type="email"
                   value={advertiseEmail}
                   onChange={(e) => setAdvertiseEmail(e.target.value)}
                   placeholder="you@email.com"
+                  autoComplete="email"
                 />
               </div>
 
@@ -369,6 +384,7 @@ export function SearchHero() {
                 onClick={handleSendAdvertise}
                 disabled={
                   isAdvertiseSending ||
+                  !advertiseFullName.trim() ||
                   !advertiseEmail.trim() ||
                   !advertiseBody.trim()
                 }

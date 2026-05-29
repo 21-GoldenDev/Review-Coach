@@ -9,8 +9,6 @@ import { insertContactSchema } from "@shared/schema";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
 import { coaches } from "@shared/schema";
-import nodemailer from "nodemailer";
-
 async function requireAdmin(
   req: Request,
   res: Response,
@@ -803,90 +801,6 @@ export async function registerRoutes(app: Express): Promise<void> {
       }
       console.error("Contact submission error:", error);
       res.status(500).json({ message: "Failed to submit contact form" });
-    }
-  });
-
-  const advertiseLastSentByIp = new Map<string, number>();
-  app.post("/api/advertise", async (req, res) => {
-    try {
-      const adminEmail = process.env.ADMIN_EMAIL;
-      if (!adminEmail) {
-        return res
-          .status(500)
-          .json({ message: "ADMIN_EMAIL is not configured" });
-      }
-
-      const ip =
-        (req.headers["x-forwarded-for"] as string | undefined)
-          ?.split(",")[0]
-          ?.trim() ||
-        req.socket.remoteAddress ||
-        "unknown";
-
-      const now = Date.now();
-      const lastSent = advertiseLastSentByIp.get(ip);
-      if (lastSent && now - lastSent < 60_000) {
-        return res
-          .status(429)
-          .json({
-            message: "Please wait a minute before sending another request",
-          });
-      }
-
-      const advertiseSchema = z.object({
-        fromEmail: z.string().email("Valid email is required"),
-        subject: z.string().min(1, "Subject is required").max(200),
-        body: z.string().min(1, "Message is required").max(10_000),
-      });
-
-      const input = advertiseSchema.parse(req.body);
-
-      const smtpHost = process.env.SMTP_HOST;
-      const smtpPort = process.env.SMTP_PORT
-        ? Number(process.env.SMTP_PORT)
-        : undefined;
-      const smtpUser = process.env.SMTP_USER;
-      const smtpPass = process.env.SMTP_PASS;
-      const smtpSecure = process.env.SMTP_SECURE === "true";
-      const smtpFrom = process.env.SMTP_FROM || smtpUser;
-
-      if (!smtpHost || !smtpPort || !smtpUser || !smtpPass) {
-        return res.status(500).json({
-          message:
-            "SMTP is not configured (SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS)",
-        });
-      }
-
-      if (!smtpFrom) {
-        return res.status(500).json({ message: "SMTP_FROM is not configured" });
-      }
-
-      const transporter = nodemailer.createTransport({
-        host: smtpHost,
-        port: smtpPort,
-        secure: smtpSecure,
-        auth: {
-          user: smtpUser,
-          pass: smtpPass,
-        },
-      });
-
-      await transporter.sendMail({
-        from: smtpFrom,
-        to: adminEmail,
-        replyTo: input.fromEmail,
-        subject: input.subject,
-        text: `From: ${input.fromEmail}\n\n${input.body}`,
-      });
-
-      advertiseLastSentByIp.set(ip, now);
-      res.json({ success: true });
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: error.errors[0].message });
-      }
-      console.error("Advertise email error:", error);
-      res.status(500).json({ message: "Failed to send message" });
     }
   });
 
