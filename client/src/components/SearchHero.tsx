@@ -209,7 +209,7 @@ export function SearchHero() {
           className="text-lg md:text-xl text-[#666666] mb-10 max-w-2xl font-medium"
         >
           Read real, honest reviews from athletes before you commit. Find the
-          perfect mentor for your journey.
+          perfect mentor for your journey-Gogi.
         </motion.p>
 
         <motion.div
