@@ -804,4 +804,20 @@ export async function registerRoutes(app: Express): Promise<void> {
     }
   });
 
+  // Advertise form: expose Web3Forms key at runtime (VPS/system env), not only at Vite build time.
+  app.get("/api/advertise-config", (_req, res) => {
+    const accessKey = (
+      process.env.VITE_WEB3FORMS_ACCESS_KEY ||
+      process.env.WEB3FORMS_ACCESS_KEY ||
+      ""
+    ).trim();
+    if (!accessKey) {
+      return res.status(503).json({
+        message:
+          "Advertise form is not configured (set VITE_WEB3FORMS_ACCESS_KEY or WEB3FORMS_ACCESS_KEY).",
+      });
+    }
+    res.json({ accessKey });
+  });
+
 }
