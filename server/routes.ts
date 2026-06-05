@@ -285,7 +285,7 @@ export async function registerRoutes(app: Express): Promise<void> {
     const approvedReviews =
       await storage.getApprovedReviewsByCoachName(coachName);
     res.json(
-      approvedReviews.map((r) => ({
+      approvedReviews.map(({ proofUrl: _proofUrl, ...r }) => ({
         ...r,
         createdAt: r.createdAt?.toISOString() ?? null,
       })),
