@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Pencil, Plus, RefreshCw, Star, Trash2, Users } from "lucide-react";
+import { ChevronLeft, ChevronRight, Pencil, Plus, RefreshCw, Star, Trash2, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -197,6 +197,76 @@ function UserTable({
   );
 }
 
+function Pagination({
+  page,
+  totalPages,
+  total,
+  onPageChange,
+}: {
+  page: number;
+  totalPages: number;
+  total: number;
+  onPageChange: (p: number) => void;
+}) {
+  if (totalPages <= 1) return null;
+
+  const pages: number[] = [];
+  const start = Math.max(1, page - 2);
+  const end = Math.min(totalPages, page + 2);
+  for (let i = start; i <= end; i++) pages.push(i);
+
+  return (
+    <div className="flex items-center justify-between pt-4 pb-2">
+      <p className="text-sm text-gray-500">
+        {total} user{total !== 1 ? "s" : ""}
+      </p>
+      <div className="flex items-center gap-1">
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={page <= 1}
+          onClick={() => onPageChange(page - 1)}
+        >
+          <ChevronLeft className="w-4 h-4" />
+        </Button>
+        {start > 1 && (
+          <>
+            <Button variant="outline" size="sm" onClick={() => onPageChange(1)}>1</Button>
+            {start > 2 && <span className="px-1 text-gray-400">...</span>}
+          </>
+        )}
+        {pages.map((p) => (
+          <Button
+            key={p}
+            variant={p === page ? "default" : "outline"}
+            size="sm"
+            onClick={() => onPageChange(p)}
+            className={p === page ? "bg-[#F5C518] text-[#202020] hover:bg-[#e0b014]" : ""}
+          >
+            {p}
+          </Button>
+        ))}
+        {end < totalPages && (
+          <>
+            {end < totalPages - 1 && <span className="px-1 text-gray-400">...</span>}
+            <Button variant="outline" size="sm" onClick={() => onPageChange(totalPages)}>{totalPages}</Button>
+          </>
+        )}
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={page >= totalPages}
+          onClick={() => onPageChange(page + 1)}
+        >
+          <ChevronRight className="w-4 h-4" />
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+const PAGE_SIZE = 15;
+
 export function AdminUsersPanel() {
   const { toast } = useToast();
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -206,6 +276,16 @@ export function AdminUsersPanel() {
   const [activeFilter, setActiveFilter] = useState<"all" | UserCategory>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [featuringUserId, setFeaturingUserId] = useState<number | null>(null);
+  const [pages, setPages] = useState<Record<string, number>>({});
+
+  const getPage = useCallback((key: string) => pages[key] || 1, [pages]);
+  const setPage = useCallback((key: string, p: number) => {
+    setPages((prev) => ({ ...prev, [key]: p }));
+  }, []);
+
+  useEffect(() => {
+    setPages({});
+  }, [activeFilter, searchQuery]);
 
   const {
     data: users,
@@ -457,6 +537,14 @@ export function AdminUsersPanel() {
       ? sections
       : sections.filter((s) => s.key === activeFilter);
 
+  const paginatedSections = visibleSections.map((s) => {
+    const page = getPage(s.key);
+    const totalPages = Math.max(1, Math.ceil(s.list.length / PAGE_SIZE));
+    const safePage = Math.min(page, totalPages);
+    const start = (safePage - 1) * PAGE_SIZE;
+    return { ...s, page: safePage, totalPages, paginatedList: s.list.slice(start, start + PAGE_SIZE) };
+  });
+
   return (
     <div>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
@@ -570,7 +658,7 @@ export function AdminUsersPanel() {
         </Card>
       ) : (
         <div className="space-y-8">
-          {visibleSections.map((section) => (
+          {paginatedSections.map((section) => (
             <div key={section.key} data-testid={`section-users-${section.key}`}>
               <div className="mb-3">
                 <h3 className="text-lg font-semibold text-[#202020]">
@@ -582,13 +670,21 @@ export function AdminUsersPanel() {
               <Card>
                 <CardContent className="p-0 overflow-x-auto">
                   <UserTable
-                    users={section.list}
+                    users={section.paginatedList}
                     onEdit={openEdit}
                     onDelete={setDeleteTarget}
                     showFeaturedActions={section.key === "coaches" || section.key === "both"}
                     onToggleFeatured={(user) => featuredMutation.mutate(user.id)}
                     featuringUserId={featuringUserId}
                   />
+                  <div className="px-4">
+                    <Pagination
+                      page={section.page}
+                      totalPages={section.totalPages}
+                      total={section.list.length}
+                      onPageChange={(p) => setPage(section.key, p)}
+                    />
+                  </div>
                 </CardContent>
               </Card>
             </div>
