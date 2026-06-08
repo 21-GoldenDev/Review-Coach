@@ -14,7 +14,6 @@ import {
   MessageCircle,
   AtSign,
   X,
-  Download,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
@@ -42,7 +41,6 @@ interface ApprovedReview {
   ratingAvailability: number | null;
   communicationStyle: string | null;
   comment: string;
-  proofUrl: string | null;
   authorName: string;
   createdAt: string | null;
 }
@@ -463,21 +461,6 @@ export default function CoachProfile() {
                         <p className="text-[#666666] text-sm leading-relaxed">
                           {review.comment}
                         </p>
-                        {/*review.proofUrl && (
-                          <div className="mt-4">
-                            <a
-                              href={review.proofUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              download
-                              className="inline-flex items-center gap-2 text-sm font-medium text-[#202020] hover:text-[#F5C518] transition-colors"
-                              data-testid={`link-review-proof-${review.id}`}
-                            >
-                              <Download className="w-4 h-4" />
-                              Download proof file
-                            </a>
-                          </div>
-                        )*/}
                       </div>
                     ))}
 

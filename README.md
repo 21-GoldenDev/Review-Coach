@@ -153,12 +153,12 @@ The **Advertise with us** dialog submits directly from the browser to [Web3Forms
 
 5. Restart (`npm run dev`) and test the form on the home page.
 
-**Production:** add `VITE_WEB3FORMS_ACCESS_KEY` in Vercel or VPS `.env`, then **rebuild** (`npm run build`) so the key is included in the client bundle.
+**Production:** set `VITE_WEB3FORMS_ACCESS_KEY` (or `WEB3FORMS_ACCESS_KEY`) in Vercel env, VPS `.env`, or system environment variables. On a VPS you can use system env + `npm start` only — the app reads the key at runtime via `/api/advertise-config`. Rebuild is optional if the key was missing during the last `npm run build`.
 
 ## Troubleshooting
 
 - **`DATABASE_URL must be set`** — Create `.env` from `.env.example` and set `DATABASE_URL`.
-- **Advertise form: not configured** — Set `VITE_WEB3FORMS_ACCESS_KEY` in `.env`, restart dev, or rebuild for production.
+- **Advertise form: not configured** — Set `VITE_WEB3FORMS_ACCESS_KEY` (or `WEB3FORMS_ACCESS_KEY` on the server) and restart the app. For local dev, restart `npm run dev`. Rebuild only needed if you rely on the key being baked into the client bundle.
 - **Admin Users shows HTML/JSON error** — Restart `npm run dev` after pulling new code. For production, run `npm run build` then `npm start`.
 - **Port in use** — Set `PORT=3000` (or another port) in `.env`.
 

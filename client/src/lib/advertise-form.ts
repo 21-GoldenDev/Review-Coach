@@ -5,16 +5,35 @@ export type AdvertiseFormInput = {
   body: string;
 };
 
+let cachedAccessKey: string | null = null;
+
+async function resolveWeb3FormsAccessKey(): Promise<string> {
+  const fromBuild = import.meta.env.VITE_WEB3FORMS_ACCESS_KEY?.trim();
+  if (fromBuild) return fromBuild;
+
+  if (cachedAccessKey) return cachedAccessKey;
+
+  const response = await fetch("/api/advertise-config");
+  const data = (await response.json().catch(() => ({}))) as {
+    accessKey?: string;
+    message?: string;
+  };
+  const accessKey = data.accessKey?.trim();
+  if (!response.ok || !accessKey) {
+    throw new Error(
+      data.message ||
+        "Advertise form is not configured (missing VITE_WEB3FORMS_ACCESS_KEY).",
+    );
+  }
+  cachedAccessKey = accessKey;
+  return accessKey;
+}
+
 /** Web3Forms free tier: submit from the browser only (server-side returns 403). */
 export async function submitAdvertiseForm(
   input: AdvertiseFormInput,
 ): Promise<void> {
-  const accessKey = import.meta.env.VITE_WEB3FORMS_ACCESS_KEY?.trim();
-  if (!accessKey) {
-    throw new Error(
-      "Advertise form is not configured (missing VITE_WEB3FORMS_ACCESS_KEY).",
-    );
-  }
+  const accessKey = await resolveWeb3FormsAccessKey();
 
   const response = await fetch("https://api.web3forms.com/submit", {
     method: "POST",
