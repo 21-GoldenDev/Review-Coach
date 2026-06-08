@@ -38,7 +38,7 @@ export async function setupVite(server: Server, app: Express) {
   });
 
   app.use("/{*path}", async (req, res, next) => {
-    if (req.path.startsWith("/api")) {
+    if (req.originalUrl.startsWith("/api")) {
       return res.status(404).json({
         message:
           "API endpoint not found. Restart the dev server (npm run dev).",

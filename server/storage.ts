@@ -13,7 +13,8 @@ import {
   type User,
   type ContactSubmission
 } from "@shared/schema";
-import { and, desc, eq, ilike, inArray, isNull, ne, or, sql } from "drizzle-orm";
+
+import { and, count, desc, eq, ilike, inArray, isNull, ne, or, sql } from "drizzle-orm";
 
 export interface PendingReview {
   id: number;
@@ -70,7 +71,9 @@ export interface IStorage {
   createUser(user: InsertUser): Promise<User>;
   getUserByEmail(email: string): Promise<User | undefined>;
   getUser(id: number): Promise<User | undefined>;
-  getPendingReviews(): Promise<PendingReview[]>;
+  getPendingReviews(page: number, limit: number): Promise<{ reviews: PendingReview[]; total: number }>;
+  getApprovedReviews(page: number, limit: number): Promise<{ reviews: PendingReview[]; total: number }>;
+  getRejectedReviews(page: number, limit: number): Promise<{ reviews: PendingReview[]; total: number }>;
   getApprovedReviewsByCoachName(coachName: string): Promise<Review[]>;
   updateReviewStatus(id: number, status: string): Promise<Review | undefined>;
   getReview(id: number): Promise<Review | undefined>;
@@ -267,29 +270,88 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
-  async getPendingReviews(): Promise<PendingReview[]> {
-    const result = await db
-      .select({
-        id: reviews.id,
-        coachName: reviews.coachName,
-        coachInstagram: reviews.coachInstagram,
-        coachEmail: reviews.coachEmail,
-        coachPhone: reviews.coachPhone,
-        coachWhatsapp: reviews.coachWhatsapp,
-        ratingResponseTime: reviews.ratingResponseTime,
-        ratingKnowledge: reviews.ratingKnowledge,
-        ratingResults: reviews.ratingResults,
-        ratingCommunication: reviews.ratingCommunication,
-        communicationStyle: reviews.communicationStyle,
-        comment: reviews.comment,
-        authorName: reviews.authorName,
-        proofUrl: reviews.proofUrl,
-        status: reviews.status,
-        createdAt: reviews.createdAt,
-      })
-      .from(reviews)
-      .where(eq(reviews.status, 'pending'));
-    return result;
+  async getPendingReviews(page: number, limit: number): Promise<{ reviews: PendingReview[]; total: number }> {
+    const offset = (page - 1) * limit;
+    const select = {
+      id: reviews.id,
+      coachName: reviews.coachName,
+      coachInstagram: reviews.coachInstagram,
+      coachEmail: reviews.coachEmail,
+      coachPhone: reviews.coachPhone,
+      coachWhatsapp: reviews.coachWhatsapp,
+      ratingResponseTime: reviews.ratingResponseTime,
+      ratingKnowledge: reviews.ratingKnowledge,
+      ratingResults: reviews.ratingResults,
+      ratingCommunication: reviews.ratingCommunication,
+      ratingAvailability: reviews.ratingAvailability,
+      communicationStyle: reviews.communicationStyle,
+      comment: reviews.comment,
+      authorName: reviews.authorName,
+      proofUrl: reviews.proofUrl,
+      status: reviews.status,
+      createdAt: reviews.createdAt,
+    };
+    const [reviewsResult, totalResult] = await Promise.all([
+      db.select(select).from(reviews).where(eq(reviews.status, 'pending')).limit(limit).offset(offset),
+      db.select({ count: count() }).from(reviews).where(eq(reviews.status, 'pending')),
+    ]);
+    return { reviews: reviewsResult, total: totalResult[0].count };
+  }
+
+  async getApprovedReviews(page: number, limit: number): Promise<{ reviews: PendingReview[]; total: number }> {
+    const offset = (page - 1) * limit;
+    const select = {
+      id: reviews.id,
+      coachName: reviews.coachName,
+      coachInstagram: reviews.coachInstagram,
+      coachEmail: reviews.coachEmail,
+      coachPhone: reviews.coachPhone,
+      coachWhatsapp: reviews.coachWhatsapp,
+      ratingResponseTime: reviews.ratingResponseTime,
+      ratingKnowledge: reviews.ratingKnowledge,
+      ratingResults: reviews.ratingResults,
+      ratingCommunication: reviews.ratingCommunication,
+      ratingAvailability: reviews.ratingAvailability,
+      communicationStyle: reviews.communicationStyle,
+      comment: reviews.comment,
+      authorName: reviews.authorName,
+      proofUrl: reviews.proofUrl,
+      status: reviews.status,
+      createdAt: reviews.createdAt,
+    };
+    const [reviewsResult, totalResult] = await Promise.all([
+      db.select(select).from(reviews).where(eq(reviews.status, 'approved')).limit(limit).offset(offset),
+      db.select({ count: count() }).from(reviews).where(eq(reviews.status, 'approved')),
+    ]);
+    return { reviews: reviewsResult, total: totalResult[0].count };
+  }
+
+  async getRejectedReviews(page: number, limit: number): Promise<{ reviews: PendingReview[]; total: number }> {
+    const offset = (page - 1) * limit;
+    const select = {
+      id: reviews.id,
+      coachName: reviews.coachName,
+      coachInstagram: reviews.coachInstagram,
+      coachEmail: reviews.coachEmail,
+      coachPhone: reviews.coachPhone,
+      coachWhatsapp: reviews.coachWhatsapp,
+      ratingResponseTime: reviews.ratingResponseTime,
+      ratingKnowledge: reviews.ratingKnowledge,
+      ratingResults: reviews.ratingResults,
+      ratingCommunication: reviews.ratingCommunication,
+      ratingAvailability: reviews.ratingAvailability,
+      communicationStyle: reviews.communicationStyle,
+      comment: reviews.comment,
+      authorName: reviews.authorName,
+      proofUrl: reviews.proofUrl,
+      status: reviews.status,
+      createdAt: reviews.createdAt,
+    };
+    const [reviewsResult, totalResult] = await Promise.all([
+      db.select(select).from(reviews).where(eq(reviews.status, 'rejected')).limit(limit).offset(offset),
+      db.select({ count: count() }).from(reviews).where(eq(reviews.status, 'rejected')),
+    ]);
+    return { reviews: reviewsResult, total: totalResult[0].count };
   }
 
   async getApprovedReviewsByCoachName(coachName: string): Promise<Review[]> {

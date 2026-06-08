@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useLocation } from "wouter";
-import { Shield, Users, MessageSquare } from "lucide-react";
+import { Shield, Users, MessageSquare, Home } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -54,9 +54,20 @@ export default function AdminDashboard() {
               Admin Dashboard
             </h1>
           </div>
-          <span className="text-sm text-gray-400" data-testid="text-logged-in-as">
-            Logged in as {user.name}
-          </span>
+          <div className="flex items-center gap-4">
+            <Button
+              onClick={() => navigate("/")}
+              variant="outline"
+              size="sm"
+              className="text-white border-gray-600 hover:bg-gray-700 hover:text-white gap-2"
+            >
+              <Home className="w-4 h-4" />
+              Homepage
+            </Button>
+            <span className="text-sm text-gray-400" data-testid="text-logged-in-as">
+              Logged in as {user.name}
+            </span>
+          </div>
         </div>
       </header>
 

@@ -509,13 +509,46 @@ export async function registerRoutes(app: Express): Promise<void> {
   app.get(api.admin.pendingReviews.path, async (req, res) => {
     if (!(await requireAdmin(req, res))) return;
 
-    const pendingReviews = await storage.getPendingReviews();
-    res.json(
-      pendingReviews.map((r) => ({
-        ...r,
-        createdAt: r.createdAt?.toISOString() ?? null,
-      })),
-    );
+    const page = Math.max(1, parseInt(String(req.query.page || "1"), 10));
+    const limit = Math.min(100, Math.max(1, parseInt(String(req.query.limit || "10"), 10)));
+    const { reviews, total } = await storage.getPendingReviews(page, limit);
+    res.json({
+      reviews: reviews.map((r) => ({ ...r, createdAt: r.createdAt?.toISOString() ?? null })),
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    });
+  });
+
+  app.get(api.admin.approvedReviews.path, async (req, res) => {
+    if (!(await requireAdmin(req, res))) return;
+
+    const page = Math.max(1, parseInt(String(req.query.page || "1"), 10));
+    const limit = Math.min(100, Math.max(1, parseInt(String(req.query.limit || "10"), 10)));
+    const { reviews, total } = await storage.getApprovedReviews(page, limit);
+    res.json({
+      reviews: reviews.map((r) => ({ ...r, createdAt: r.createdAt?.toISOString() ?? null })),
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    });
+  });
+
+  app.get(api.admin.rejectedReviews.path, async (req, res) => {
+    if (!(await requireAdmin(req, res))) return;
+
+    const page = Math.max(1, parseInt(String(req.query.page || "1"), 10));
+    const limit = Math.min(100, Math.max(1, parseInt(String(req.query.limit || "10"), 10)));
+    const { reviews, total } = await storage.getRejectedReviews(page, limit);
+    res.json({
+      reviews: reviews.map((r) => ({ ...r, createdAt: r.createdAt?.toISOString() ?? null })),
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    });
   });
 
   app.post(api.admin.approveReview.path, async (req, res) => {
@@ -560,6 +593,26 @@ export async function registerRoutes(app: Express): Promise<void> {
 
     await storage.updateReviewStatus(reviewId, "rejected");
     res.json({ success: true });
+  });
+
+  app.post("/api/admin/reviews/:id/unpublish", async (req, res, next) => {
+    try {
+      console.log("[unpublish] handler called for id:", req.params.id);
+      if (!(await requireAdmin(req, res))) return;
+
+      const reviewId = Number(req.params.id);
+      const review = await storage.getReview(reviewId);
+      if (!review) {
+        return res.status(404).json({ message: "Review not found" });
+      }
+
+      await storage.updateReviewStatus(reviewId, "pending");
+      console.log("[unpublish] success, set review", reviewId, "to pending");
+      res.json({ success: true });
+    } catch (err) {
+      console.error("[unpublish] error:", err);
+      next(err);
+    }
   });
 
   app.get(api.admin.listUsers.path, async (req, res) => {
