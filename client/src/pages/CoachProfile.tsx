@@ -582,7 +582,7 @@ export default function CoachProfile() {
                   </div>
                 )}
 
-                {contactInfo.reviewEmails.length > 0 &&
+                {contactInfo.reviewEmails?.length > 0 &&
                   contactInfo.reviewEmails.map((email, i) => (
                     <div
                       key={`re-${i}`}
@@ -604,7 +604,7 @@ export default function CoachProfile() {
                     </div>
                   ))}
 
-                {contactInfo.reviewPhones.length > 0 &&
+                {contactInfo.reviewPhones?.length > 0 &&
                   contactInfo.reviewPhones.map((phone, i) => (
                     <div
                       key={`rp-${i}`}
@@ -626,7 +626,7 @@ export default function CoachProfile() {
                     </div>
                   ))}
 
-                {contactInfo.reviewWhatsapps.length > 0 &&
+                {contactInfo.reviewWhatsapps?.length > 0 &&
                   contactInfo.reviewWhatsapps.map((whatsapp, i) => (
                     <div
                       key={`rw-${i}`}
@@ -671,9 +671,9 @@ export default function CoachProfile() {
                 )}
 
                 {!contactInfo.signupEmail &&
-                  contactInfo.reviewEmails.length === 0 &&
-                  contactInfo.reviewPhones.length === 0 &&
-                  contactInfo.reviewWhatsapps.length === 0 &&
+                  (contactInfo.reviewEmails?.length ?? 0) === 0 &&
+                  (contactInfo.reviewPhones?.length ?? 0) === 0 &&
+                  (contactInfo.reviewWhatsapps?.length ?? 0) === 0 &&
                   !contactInfo.instagram && (
                     <p className="text-sm text-[#999999] text-center py-4">
                       No contact information available for this coach.
