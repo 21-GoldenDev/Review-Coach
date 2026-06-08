@@ -295,7 +295,7 @@ function ReviewList({
     );
   }
 
-  if (!data || data.reviews.length === 0) {
+  if (!data?.reviews?.length) {
     return (
       <Card>
         <CardContent className="py-12 text-center">
