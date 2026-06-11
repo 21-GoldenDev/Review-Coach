@@ -1,12 +1,19 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "wouter";
+import { useAuth } from "@/hooks/use-auth";
 import { Header } from "@/components/Header";
 import { SearchHero } from "@/components/SearchHero";
 import { Footer } from "@/components/Footer";
 import { CoachCard } from "@/components/CoachCard";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
-import { Star, MessageSquare, Download, ExternalLink, Loader2 } from "lucide-react";
+import {
+  Star,
+  MessageSquare,
+  Download,
+  ExternalLink,
+  Loader2,
+} from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -56,6 +63,7 @@ function ReviewDetailDialog({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
+  const { user } = useAuth();
   if (!review) return null;
 
   const renderStars = (rating: number | null) => {
@@ -77,18 +85,27 @@ function ReviewDetailDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-xl">Review from {review.authorName}</DialogTitle>
+          <DialogTitle className="text-xl">
+            Review from {review.authorName}
+          </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-5">
           <div className="flex items-center gap-3 bg-[#F5C518]/10 p-4 rounded-lg">
-            <Star className="w-6 h-6 text-[#F5C518]" style={{ fill: "#F5C518" }} />
+            <Star
+              className="w-6 h-6 text-[#F5C518]"
+              style={{ fill: "#F5C518" }}
+            />
             <div>
-              <span className="text-2xl font-bold text-[#202020]">{review.overallRating}</span>
+              <span className="text-2xl font-bold text-[#202020]">
+                {review.overallRating}
+              </span>
               <span className="text-gray-500 text-sm ml-2">overall rating</span>
             </div>
             <span className="text-sm text-gray-400 ml-auto">
-              {review.createdAt ? new Date(review.createdAt).toLocaleDateString() : ""}
+              {review.createdAt
+                ? new Date(review.createdAt).toLocaleDateString()
+                : ""}
             </span>
           </div>
 
@@ -102,13 +119,17 @@ function ReviewDetailDialog({
               {review.coachName}
             </Link>
             {review.communicationStyle && (
-              <p className="text-sm text-gray-500 mt-1">Contact: {review.communicationStyle}</p>
+              <p className="text-sm text-gray-500 mt-1">
+                Contact: {review.communicationStyle}
+              </p>
             )}
           </div>
 
           <div>
             <h4 className="font-semibold text-[#202020] mb-2">Review</h4>
-            <p className="text-gray-700 bg-gray-50 p-4 rounded-lg whitespace-pre-line">{review.comment}</p>
+            <p className="text-gray-700 bg-gray-50 p-4 rounded-lg whitespace-pre-line">
+              {review.comment}
+            </p>
           </div>
 
           <div>
@@ -137,7 +158,7 @@ function ReviewDetailDialog({
             </div>
           </div>
 
-          {review.proofUrl && (
+          {review.proofUrl && user?.role === "admin" && (
             <div className="flex gap-3 pt-2">
               <a
                 href={review.proofUrl}
@@ -148,6 +169,7 @@ function ReviewDetailDialog({
                 <ExternalLink className="w-4 h-4" />
                 View Proof
               </a>
+
               <a
                 href={review.proofUrl}
                 download
@@ -166,7 +188,9 @@ function ReviewDetailDialog({
 
 export default function Home() {
   const [visibleCount, setVisibleCount] = useState(COACHES_PER_PAGE);
-  const [selectedReview, setSelectedReview] = useState<RecentReview | null>(null);
+  const [selectedReview, setSelectedReview] = useState<RecentReview | null>(
+    null,
+  );
   const isLoadingMore = useRef(false);
   const hasMoreRef = useRef(true);
   const observerRef = useRef<IntersectionObserver | null>(null);
@@ -200,7 +224,11 @@ export default function Home() {
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting && hasMoreRef.current && !isLoadingMore.current) {
+        if (
+          entry.isIntersecting &&
+          hasMoreRef.current &&
+          !isLoadingMore.current
+        ) {
           isLoadingMore.current = true;
           setVisibleCount((prev) => prev + COACHES_PER_PAGE);
         }
@@ -238,7 +266,9 @@ export default function Home() {
                 <h2 className="text-3xl md:text-4xl font-extrabold text-[#202020] mb-2">
                   Recent Reviews
                 </h2>
-                <p className="text-[#666666]">What athletes are saying about their coaches</p>
+                <p className="text-[#666666]">
+                  What athletes are saying about their coaches
+                </p>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {recentReviews.map((review) => (
@@ -250,10 +280,17 @@ export default function Home() {
                     <div className="bg-white rounded-xl p-6 border border-gray-100 hover:border-[#F5C518] hover:shadow-md transition-all h-full">
                       <div className="flex items-center gap-2 mb-3">
                         <div className="flex items-center gap-1 text-[#F5C518]">
-                          <Star className="w-5 h-5" style={{ fill: "#F5C518" }} />
-                          <span className="font-bold text-[#202020] text-lg">{review.overallRating}</span>
+                          <Star
+                            className="w-5 h-5"
+                            style={{ fill: "#F5C518" }}
+                          />
+                          <span className="font-bold text-[#202020] text-lg">
+                            {review.overallRating}
+                          </span>
                         </div>
-                        <span className="text-sm text-gray-400">· {timeAgo(review.createdAt)}</span>
+                        <span className="text-sm text-gray-400">
+                          · {timeAgo(review.createdAt)}
+                        </span>
                       </div>
                       <p className="text-[#666666] text-sm leading-relaxed line-clamp-3 mb-4">
                         &ldquo;{review.comment}&rdquo;
@@ -264,7 +301,9 @@ export default function Home() {
                             {review.coachName}
                           </span>
                           <span className="text-gray-400 mx-1">·</span>
-                          <span className="text-gray-500">{review.authorName}</span>
+                          <span className="text-gray-500">
+                            {review.authorName}
+                          </span>
                         </div>
                         <MessageSquare className="w-4 h-4 text-gray-300 group-hover:text-[#F5C518] transition-colors" />
                       </div>
@@ -311,7 +350,10 @@ export default function Home() {
                   ))}
                 </div>
                 {hasMore ? (
-                  <div ref={sentinelCallbackRef} className="flex justify-center py-8">
+                  <div
+                    ref={sentinelCallbackRef}
+                    className="flex justify-center py-8"
+                  >
                     <Loader2 className="w-6 h-6 text-[#F5C518] animate-spin" />
                   </div>
                 ) : allCoaches.length > COACHES_PER_PAGE ? (
