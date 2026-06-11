@@ -82,6 +82,32 @@ export const api = {
         200: z.array(z.custom<typeof reviews.$inferSelect>()),
       },
     },
+    recent: {
+      method: 'GET' as const,
+      path: '/api/reviews/recent',
+      responses: {
+        200: z.object({
+          id: z.number(),
+          coachId: z.number().nullable(),
+          coachName: z.string(),
+          coachInstagram: z.string().nullable(),
+          coachEmail: z.string().nullable(),
+          coachPhone: z.string().nullable(),
+          coachWhatsapp: z.string().nullable(),
+          communicationStyle: z.string().nullable(),
+          authorName: z.string(),
+          comment: z.string(),
+          overallRating: z.string(),
+          ratingResponseTime: z.number().nullable(),
+          ratingKnowledge: z.number().nullable(),
+          ratingResults: z.number().nullable(),
+          ratingCommunication: z.number().nullable(),
+          ratingAvailability: z.number().nullable(),
+          proofUrl: z.string().nullable(),
+          createdAt: z.string().nullable(),
+        }).array(),
+      },
+    },
   },
   auth: {
     register: {

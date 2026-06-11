@@ -292,6 +292,45 @@ export async function registerRoutes(app: Express): Promise<void> {
     );
   });
 
+  app.get(api.reviews.recent.path, async (_req, res) => {
+    const recent = await storage.getRecentReviews(5);
+
+    const reviewsWithCoachId = await Promise.all(
+      recent.map(async (r) => {
+        let coachId = r.coachId;
+        if (!coachId) {
+          const coach = await storage.getCoachByName(r.coachName.trim());
+          coachId = coach?.id ?? null;
+        }
+        const ratings = [r.ratingResponseTime, r.ratingKnowledge, r.ratingResults, r.ratingCommunication, r.ratingAvailability]
+          .filter((v): v is number => v != null);
+        const avg = ratings.length > 0 ? (ratings.reduce((a, b) => a + b, 0) / ratings.length).toFixed(1) : "N/A";
+        return {
+          id: r.id,
+          coachId,
+          coachName: r.coachName,
+          coachInstagram: r.coachInstagram,
+          coachEmail: r.coachEmail,
+          coachPhone: r.coachPhone,
+          coachWhatsapp: r.coachWhatsapp,
+          communicationStyle: r.communicationStyle,
+          authorName: r.authorName,
+          comment: r.comment,
+          overallRating: avg,
+          ratingResponseTime: r.ratingResponseTime,
+          ratingKnowledge: r.ratingKnowledge,
+          ratingResults: r.ratingResults,
+          ratingCommunication: r.ratingCommunication,
+          ratingAvailability: r.ratingAvailability,
+          proofUrl: r.proofUrl,
+          createdAt: r.createdAt?.toISOString() ?? null,
+        };
+      }),
+    );
+
+    res.json(reviewsWithCoachId);
+  });
+
   app.post(api.auth.register.path, async (req, res) => {
     try {
       const input = api.auth.register.input.parse(req.body);

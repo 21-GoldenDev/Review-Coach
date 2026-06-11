@@ -18,6 +18,7 @@ import { and, count, desc, eq, ilike, inArray, isNull, ne, or, sql } from "drizz
 
 export interface PendingReview {
   id: number;
+  coachId: number | null;
   coachName: string;
   coachInstagram: string | null;
   coachEmail: string | null;
@@ -27,6 +28,7 @@ export interface PendingReview {
   ratingKnowledge: number | null;
   ratingResults: number | null;
   ratingCommunication: number | null;
+  ratingAvailability: number | null;
   communicationStyle: string | null;
   comment: string;
   authorName: string;
@@ -75,6 +77,7 @@ export interface IStorage {
   getApprovedReviews(page: number, limit: number): Promise<{ reviews: PendingReview[]; total: number }>;
   getRejectedReviews(page: number, limit: number): Promise<{ reviews: PendingReview[]; total: number }>;
   getApprovedReviewsByCoachName(coachName: string): Promise<Review[]>;
+  getRecentReviews(limit: number): Promise<PendingReview[]>;
   updateReviewStatus(id: number, status: string): Promise<Review | undefined>;
   getReview(id: number): Promise<Review | undefined>;
   createContactSubmission(contact: InsertContact): Promise<ContactSubmission>;
@@ -274,6 +277,7 @@ export class DatabaseStorage implements IStorage {
     const offset = (page - 1) * limit;
     const select = {
       id: reviews.id,
+      coachId: reviews.coachId,
       coachName: reviews.coachName,
       coachInstagram: reviews.coachInstagram,
       coachEmail: reviews.coachEmail,
@@ -302,6 +306,7 @@ export class DatabaseStorage implements IStorage {
     const offset = (page - 1) * limit;
     const select = {
       id: reviews.id,
+      coachId: reviews.coachId,
       coachName: reviews.coachName,
       coachInstagram: reviews.coachInstagram,
       coachEmail: reviews.coachEmail,
@@ -330,6 +335,7 @@ export class DatabaseStorage implements IStorage {
     const offset = (page - 1) * limit;
     const select = {
       id: reviews.id,
+      coachId: reviews.coachId,
       coachName: reviews.coachName,
       coachInstagram: reviews.coachInstagram,
       coachEmail: reviews.coachEmail,
@@ -362,6 +368,35 @@ export class DatabaseStorage implements IStorage {
     return result.filter(r => 
       r.coachName?.toLowerCase().includes(coachName.toLowerCase())
     );
+  }
+
+  async getRecentReviews(limit: number): Promise<PendingReview[]> {
+    const select = {
+      id: reviews.id,
+      coachId: reviews.coachId,
+      coachName: reviews.coachName,
+      coachInstagram: reviews.coachInstagram,
+      coachEmail: reviews.coachEmail,
+      coachPhone: reviews.coachPhone,
+      coachWhatsapp: reviews.coachWhatsapp,
+      ratingResponseTime: reviews.ratingResponseTime,
+      ratingKnowledge: reviews.ratingKnowledge,
+      ratingResults: reviews.ratingResults,
+      ratingCommunication: reviews.ratingCommunication,
+      ratingAvailability: reviews.ratingAvailability,
+      communicationStyle: reviews.communicationStyle,
+      comment: reviews.comment,
+      authorName: reviews.authorName,
+      proofUrl: reviews.proofUrl,
+      status: reviews.status,
+      createdAt: reviews.createdAt,
+    };
+    return db
+      .select(select)
+      .from(reviews)
+      .where(eq(reviews.status, 'approved'))
+      .orderBy(desc(reviews.createdAt))
+      .limit(limit);
   }
 
   async updateReviewStatus(id: number, status: string): Promise<Review | undefined> {
