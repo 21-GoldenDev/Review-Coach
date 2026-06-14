@@ -54,6 +54,7 @@ export default function CoachProfile() {
   const [, navigate] = useLocation();
   const [showSignInPopup, setShowSignInPopup] = useState(false);
   const [showContactDialog, setShowContactDialog] = useState(false);
+  const [showAllReviews, setShowAllReviews] = useState(false);
 
   interface ContactInfo {
     signupEmail: string | null;
@@ -428,7 +429,7 @@ export default function CoachProfile() {
                   </p>
                 ) : (
                   <div className="space-y-6">
-                    {approvedReviews.slice(0, 5).map((review) => (
+                    {approvedReviews.slice(0, showAllReviews ? undefined : 5).map((review) => (
                       <div
                         key={review.id}
                         className="pb-6 border-b border-gray-50 last:border-0 last:pb-0"
@@ -464,13 +465,25 @@ export default function CoachProfile() {
                       </div>
                     ))}
 
-                    {approvedReviews.length > 5 && (
+                    {showAllReviews ? (
                       <div className="pt-2">
-                        <button className="text-[#F5C518] font-semibold text-sm hover:underline">
+                        <button
+                          onClick={() => setShowAllReviews(false)}
+                          className="text-[#F5C518] font-semibold text-sm hover:underline"
+                        >
+                          Show less
+                        </button>
+                      </div>
+                    ) : approvedReviews.length > 5 ? (
+                      <div className="pt-2">
+                        <button
+                          onClick={() => setShowAllReviews(true)}
+                          className="text-[#F5C518] font-semibold text-sm hover:underline"
+                        >
                           View all {approvedReviews.length} reviews
                         </button>
                       </div>
-                    )}
+                    ) : null}
                   </div>
                 )}
               </section>
